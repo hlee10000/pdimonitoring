@@ -21,10 +21,13 @@ def load_easy_ocr():
 
 reader = load_easy_ocr()
 
-uploaded_file = st.file_uploader("행별로 이미지를 순서대로 업로드하세요", type=["png", "jpg", "jpeg"])
+uploaded_files = st.file_uploader("이미지를 여러 장 한꺼번에 선택하세요", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
+if uploaded_files:
+    # 루프를 돌며 처리합니다
+    for uploaded_file in uploaded_files:
+        image = Image.open(uploaded_file)
+        img_np = np.array(image)
     
     # [핵심 추가] 이미지 크기 2배 확대 (가독성 확보)
     w_orig, h_orig = image.size
