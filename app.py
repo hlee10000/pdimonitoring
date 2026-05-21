@@ -1,52 +1,39 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image, ImageGrab
+from PIL import Image
 import numpy as np
 import cv2
 import easyocr
 import io
 
-st.set_page_config(page_title="최종 완성형 스마트 OCR", layout="wide")
+st.set_page_config(page_title="PDI Quota OCR", layout="wide")
 
-if 'all_rows_data' not in st.session_state:
-    st.session_state.all_rows_data = []
+if 'all_rows_data' not in st.session_state: st.session_state.all_rows_data = []
 
 st.title("PDI Quota OCR")
+st.write("이미지를 복사(Ctrl+C)한 후, 아래 '파일 업로드' 영역을 클릭하고 붙여넣기(Ctrl+V) 하세요.")
 
 @st.cache_resource
-def load_easy_ocr():
-    return easyocr.Reader(['en'], gpu=False)
-
+def load_easy_ocr(): return easyocr.Reader(['en'], gpu=False)
 reader = load_easy_ocr()
 
-# 1. 이미지 선택 영역
-tab1, tab2 = st.tabs(["📂 파일 업로드", "📋 클립보드에서 붙여넣기"])
-image_to_process = None
+# [변경] 복잡한 탭 구조 대신 파일 업로드 하나로 통일
+# 브라우저상에서 Ctrl+V를 하면 여기에 바로 이미지가 인식됩니다.
+uploaded_file = st.file_uploader("이미지를 선택하거나 붙여넣기(Ctrl+V) 하세요", type=["png", "jpg", "jpeg"])
 
-with tab1:
-    uploaded_file = st.file_uploader("이미지를 선택하세요", type=["png", "jpg", "jpeg"])
-    if uploaded_file:
-        image_to_process = Image.open(uploaded_file)
-
-with tab2:
-    if st.button("📋 클립보드에서 불러오기"):
-        clipboard_img = ImageGrab.grabclipboard()
-        if clipboard_img:
-            image_to_process = clipboard_img
-        else:
-            st.error("클립보드에 이미지가 없습니다.")
-
-# 2. 이미지가 선택되었을 때만 하단 로직 실행
-if image_to_process:
-    img_np = np.array(image_to_process)
+if uploaded_file:
+    image = Image.open(uploaded_file)
+    img_np = np.array(image)
     h, w, _ = img_np.shape
+
+    # 이미지 확대 및 판독 로직
+    w_orig, h_orig = image.size
+    image_scaled = image.resize((w_orig * 2, h_orig * 2), Image.Resampling.LANCZOS)
     
-    # 이미지 확대 표시
-    image_scaled = image_to_process.resize((w * 2, h * 2), Image.Resampling.LANCZOS)
-    st.subheader("📷 확대된 원본 이미지 (1:1 대조용)")
+    st.subheader("📷 확대된 원본 이미지")
     st.image(image_scaled, use_container_width=True)
 
-    has_total = st.checkbox("이미지 맨 우측 끝에 'Total(합계)' 칸이 포함되어 있습니까?", value=True)
+    has_total = st.checkbox("Total(합계) 포함 여부", value=True)
 
     if st.button("🚀 판독 시작"):
         with st.spinner("이미지 최적화 및 판독 중..."):
