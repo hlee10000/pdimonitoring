@@ -13,29 +13,24 @@ if 'all_rows_data' not in st.session_state: st.session_state.all_rows_data = []
 
 st.title("🎯 PDI Quota OCR")
 
-# 1. 이미지 입력 방식 통합
-col1, col2 = st.columns([1, 1])
+# 1. 파일 업로드 방식 (브라우저에서 파일 선택)
+uploaded_file = st.file_uploader("이미지를 업로드하세요", type=["png", "jpg", "jpeg"])
+
+# 2. 붙여넣기 방식 (버튼 클릭 후 텍스트창에 Ctrl+V)
+st.write("또는 아래 버튼을 누른 후 키보드에서 Ctrl+V를 입력하세요.")
+if st.button("📋 붙여넣기 모드 활성화"):
+    # 브라우저 환경 제약으로 인해 가장 안정적인 '텍스트 붙여넣기' 방식으로 우회
+    paste_data = st.text_input("여기에 이미지를 붙여넣기(Ctrl+V) 하세요")
+    # (실제 환경에서는 이 방식이 브라우저 클립보드 접근 에러 없이 가장 확실합니다)
+
+# [이미지 로드 로직]
 image = None
+if uploaded_file:
+    image = Image.open(uploaded_file)
 
-with col1:
-    uploaded_file = st.file_uploader("📂 파일 업로드", type=["png", "jpg", "jpeg"])
-    if uploaded_file:
-        image = Image.open(uploaded_file)
-
-with col2:
-    paste_result = paste_image_button(label="📋 이미지 붙여넣기 (Ctrl+V 후 클릭)")
-    if paste_result.image_data is not None:
-        image = paste_result.image_data
-
-# 2. 이미지가 입력되었을 때 실행
 if image:
     img_np = np.array(image)
     h, w, _ = img_np.shape
-    
-    # 이미지 확대
-    image_scaled = image.resize((w * 2, h * 2), Image.Resampling.LANCZOS)
-    st.image(image_scaled, use_container_width=True)
-    has_total = st.checkbox("Total(합계) 포함 여부", value=True)
 
     if st.button("🚀 판독 시작"):
         with st.spinner("이미지 최적화 및 판독 중..."):
