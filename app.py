@@ -104,5 +104,3 @@ if st.session_state.all_rows_data:
     if st.button("🗑 데이터 전체 초기화"):
         st.session_state.all_rows_data = []
         st.rerun()
-
-```
