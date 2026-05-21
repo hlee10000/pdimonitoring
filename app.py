@@ -25,7 +25,10 @@ if uploaded_files:
         h, w, _ = img_np.shape
         st.subheader("📷 확대된 원본 이미지 (1:1 대조용)")
         st.image(image_scaled, use_container_width=True)
-        has_total = st.checkbox("이미지 맨 우측 끝에 'Total(합계)' 칸이 포함되어 있습니까?", value=True)
+        has_total = st.checkbox("이미지 맨 우측 끝에 'Total(합계)' 칸이 포함되어 있습니까?", value=True, key=f"total_{idx}")
+        # 버튼에도 고유 키 부여
+        if st.button("💾 이 행 추가", key=f"add_{idx}"):
+            st.session_state.all_rows_data.append(edited_df.iloc[0].to_dict())
         with st.spinner("이미지 최적화 및 판독 중..."):
             gray_full = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
             edges = cv2.adaptiveThreshold(gray_full, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
