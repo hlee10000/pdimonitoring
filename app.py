@@ -1,8 +1,3 @@
-`idx`를 인식하지 못하는 문제는 `for` 루프에서 `enumerate(uploaded_files)`를 사용하지 않았기 때문입니다. 그리고 `st.data_editor`와 `st.button`에도 고유 `key`를 부여하여 중복 ID 에러를 방지했습니다.
-
-요청하신 대로 수정이 필요한 부분만 정확히 반영하여 전체 코드를 보냅니다.
-
-```python
 import streamlit as st
 import pandas as pd
 from PIL import Image
